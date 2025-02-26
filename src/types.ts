@@ -1,4 +1,3 @@
-// Core system types for macOS terminal simulation
 export interface SystemState {
   fileSystem: FileSystemState;
   environment: EnvironmentState;
@@ -48,7 +47,6 @@ export interface HistoryEntry {
   timestamp: string;
 }
 
-// Enhanced file system types
 export interface FileSystemState {
   root: FileSystemNode;
   currentPath: string[];
@@ -92,7 +90,6 @@ export interface SpecialPermissions {
   sticky: boolean;
 }
 
-// Command processing types
 export interface StateChanges {
   fileSystem?: FileSystemChanges[];
   environment?: EnvironmentChanges[];
@@ -129,7 +126,6 @@ export interface ProcessChanges {
   };
 }
 
-// Terminal window state (UI related)
 export interface TerminalState {
   currentDirectory: string;
   history: HistoryEntry[];
@@ -141,14 +137,10 @@ export interface WindowState {
   size: { width: number; height: number };
 }
 
-// This is just a minimal representation for the LLM to understand
-// The actual filesystem state will be maintained in the LLM's context
 export interface VirtualFilesystem {
-  // Just a placeholder to indicate this is handled by the LLM
   _managed_by_llm: boolean;
 }
 
-// For backward compatibility if needed
 export interface LegacySystemState {
   fileSystem: {
     currentPath: string[];

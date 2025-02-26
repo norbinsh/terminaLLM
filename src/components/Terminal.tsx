@@ -3,14 +3,10 @@ import Draggable from 'react-draggable';
 import { useTerminalStore } from '../store/terminalStore';
 import { initializeClient } from '../utils/llm';
 
-// Helper function to clean terminal output from section markers
 const cleanTerminalOutput = (output: string): string => {
   return output
-    // Remove section markers
     .replace(/---(?:output|directory)---/g, '')
-    // Replace consecutive newlines
     .replace(/\n{3,}/g, '\n\n')
-    // Trim whitespace
     .trim();
 };
 
@@ -26,18 +22,15 @@ export const Terminal: React.FC = () => {
   const dragRef = useRef<HTMLDivElement>(null);
 
   const {
-    // Core state
     currentDirectory,
     history,
     
-    // UI state
     isOpen,
     position,
     size,
     apiKey,
     isProcessing,
     
-    // Actions
     setTerminalWindow,
     setApiKey,
     setProcessing,
@@ -45,7 +38,6 @@ export const Terminal: React.FC = () => {
     addToHistory
   } = useTerminalStore();
 
-  // Open terminal on mount
   useEffect(() => {
     setTerminalWindow({ isOpen: true });
   }, [setTerminalWindow]);
@@ -58,7 +50,6 @@ export const Terminal: React.FC = () => {
 
   const handleApiKeySubmission = async (key: string) => {
     setProcessing(true);
-    // Clear input immediately to prevent key from being displayed
     setInput('');
     
     if (!key || key.trim().length < 10) {
@@ -79,7 +70,6 @@ export const Terminal: React.FC = () => {
       initializeClient(key);
       setApiKey(key);
       
-      // Add masked API key entry to history
       addToHistory({
         command: '[API Key Input]',
         output: 'API key accepted.',
@@ -87,10 +77,8 @@ export const Terminal: React.FC = () => {
         timestamp: new Date().toISOString()
       });
       
-      // Add welcome message
       await executeCommand('echo "Terminal ready. API connection established."');
     } catch (error) {
-      // Don't log the API key in error messages
       console.error('API key validation failed:', error);
       setApiKey(null);
       addToHistory({
@@ -109,7 +97,6 @@ export const Terminal: React.FC = () => {
 
     const currentInput = input;
     
-    // Clear input before processing command to prevent sensitive data from lingering
     setInput('');
 
     if (!apiKey) {
@@ -154,7 +141,6 @@ export const Terminal: React.FC = () => {
       }
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      // Tab completion would be handled by the LLM
     }
   };
 
