@@ -1,14 +1,12 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { CommandResult } from '../types';
 
-// Define the model to use
 export const CLAUDE_MODEL = 'claude-3-7-sonnet-latest';
 let client: Anthropic | null = null;
 
 export const initializeClient = (key: string): void => {
   client = new Anthropic({
     apiKey: key,
-    // Enable browser support
     dangerouslyAllowBrowser: true
   });
 };
@@ -27,7 +25,6 @@ export const sendCommandToLLM = async (
   }
 
   try {
-    // Single, focused prompt for terminal simulation
     const systemPrompt = `
 You are simulating a macOS terminal. The user will enter commands, and you will respond as if you are the terminal.
 
@@ -52,7 +49,6 @@ Your response must be formatted as follows:
 (The new current directory if changed, otherwise omit this section)
 `;
 
-    // Use the SDK to make the API call
     const response = await client.messages.create({
       model: CLAUDE_MODEL,
       max_tokens: 1000,
@@ -64,12 +60,10 @@ Your response must be formatted as follows:
         }
       ]
     });
-
-    // Access content safely with type checking
+    
     const contentBlock = response.content[0];
     const content = 'text' in contentBlock ? contentBlock.text : '';
     
-    // Extract output and directory changes
     const outputMatch = content.match(/---output---([\s\S]*?)(?:---directory---|$)/);
     const directoryMatch = content.match(/---directory---([\s\S]*?)$/);
     

@@ -3,16 +3,13 @@ export interface CommandResult {
   success: boolean;
   stateChanges?: {
     currentDirectory?: string;
-    // Add other state changes as needed
   };
 }
 
 export const cd = async (args: string[], fs: FileSystem): Promise<CommandResult> => {
   const path = args[0] || '~';
   try {
-    // Get the new path as an array
     const newPathArray = fs.changeDirectory(path);
-    // Convert to string for state changes
     const newPathString = '/' + newPathArray.join('/');
     
     return {

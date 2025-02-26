@@ -9,7 +9,6 @@ import {
   FilePermissions
 } from '../types';
 
-// Default permission templates
 const DEFAULT_FILE_PERMISSIONS: FilePermissions = {
   user: { read: true, write: true, execute: false },
   group: { read: true, write: false, execute: false },
@@ -24,7 +23,6 @@ const DEFAULT_DIR_PERMISSIONS: FilePermissions = {
   special: { setuid: false, setgid: false, sticky: false }
 };
 
-// Initialize a new file system node
 export function createFSNode(
   name: string,
   type: 'file' | 'directory' | 'symlink',
@@ -50,7 +48,6 @@ export function createFSNode(
   };
 }
 
-// Initialize the root file system
 function initializeFileSystem(): FileSystemState {
   const root = createFSNode('/', 'directory', {
     'bin': createFSNode('bin', 'directory', {}),
@@ -81,7 +78,6 @@ function initializeFileSystem(): FileSystemState {
   };
 }
 
-// Initialize environment state
 function initializeEnvironment(): EnvironmentState {
   return {
     variables: {
@@ -101,7 +97,6 @@ function initializeEnvironment(): EnvironmentState {
   };
 }
 
-// Initialize process state
 function initializeProcesses(): ProcessState {
   const initProcess = {
     pid: 1,
@@ -118,7 +113,6 @@ function initializeProcesses(): ProcessState {
   };
 }
 
-// Initialize command history
 function initializeHistory(): CommandHistory {
   return {
     entries: [],
@@ -126,7 +120,6 @@ function initializeHistory(): CommandHistory {
   };
 }
 
-// Initialize complete system state
 export function initializeSystem(): SystemState {
   return {
     fileSystem: initializeFileSystem(),
@@ -136,14 +129,11 @@ export function initializeSystem(): SystemState {
   };
 }
 
-// Utility functions for path manipulation
 export function resolvePath(currentPath: string[], targetPath: string): string[] {
-  // Handle absolute paths
   if (targetPath.startsWith('/')) {
     return targetPath.split('/').filter(Boolean);
   }
 
-  // Handle special cases
   if (targetPath === '.' || targetPath === '') {
     return [...currentPath];
   }
@@ -157,7 +147,6 @@ export function resolvePath(currentPath: string[], targetPath: string): string[]
     return ['home', 'user', ...targetPath.slice(2).split('/').filter(Boolean)];
   }
 
-  // Handle relative paths
   const parts = targetPath.split('/').filter(Boolean);
   const newPath = [...currentPath];
 
@@ -172,7 +161,6 @@ export function resolvePath(currentPath: string[], targetPath: string): string[]
   return newPath;
 }
 
-// Get node at path
 export function getNodeAtPath(root: FileSystemNode, path: string[]): FileSystemNode | null {
   let current = root;
 
@@ -189,7 +177,6 @@ export function getNodeAtPath(root: FileSystemNode, path: string[]): FileSystemN
   return current;
 }
 
-// Format permissions string (like ls -l)
 export function formatPermissions(permissions: FilePermissions): string {
   const { user, group, others } = permissions;
   
@@ -200,7 +187,6 @@ export function formatPermissions(permissions: FilePermissions): string {
   return `${userStr}${groupStr}${othersStr}`;
 }
 
-// Format size for ls output
 export function formatSize(size: number): string {
   if (size < 1024) return size.toString();
   if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)}K`;
@@ -208,7 +194,6 @@ export function formatSize(size: number): string {
   return `${(size / (1024 * 1024 * 1024)).toFixed(1)}G`;
 }
 
-// Check if user has permission for operation
 export function checkPermission(
   node: FileSystemNode,
   user: string,

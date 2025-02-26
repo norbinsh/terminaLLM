@@ -4,7 +4,6 @@ import { CLAUDE_MODEL } from './llm';
 
 let client: Anthropic | null = null;
 
-// Helper function to create an Anthropic client with browser access
 const createClient = (apiKey: string) => new Anthropic({
   apiKey,
   dangerouslyAllowBrowser: true
@@ -141,7 +140,6 @@ interface SessionContext {
   };
 }
 
-// Add conversation history to the store
 interface TerminalHistory {
   command: string;
   output: string;
@@ -151,7 +149,6 @@ interface TerminalHistory {
   };
 }
 
-// Move conversation history to the store
 export interface TerminalStore {
   history: TerminalHistory[];
   addHistory: (entry: TerminalHistory) => void;
@@ -200,9 +197,6 @@ export const validateApiKey = async (apiKey: string): Promise<boolean> => {
       console.error('API key validation failed:', {
         name: error.name,
         message: error.message,
-        // Don't log stack trace as it might contain the API key
-        // stack: error.stack,
-        // details: error
       });
     } else {
       console.error('API key validation failed - unknown error type');
@@ -227,19 +221,16 @@ export const processCommand = async (
     return 'Error: Terminal not initialized. Please provide a valid Claude API key.';
   }
 
-  // Special handling for API key input command
   if (command === '[API Key Input]') {
     return 'API key accepted.';
   }
 
   try {
-    // Get current file system state
     const currentState = {
       currentPath: context.currentPath,
       files: context.fileSystem.getNode([])?.content || {}
     };
 
-    // Build conversation history context
     const historyContext = terminalStore.history
       .map(h => `Command: ${h.command}
 Output: ${h.output}
@@ -248,7 +239,6 @@ Files: ${JSON.stringify(h.state.files, null, 2)}
 ---`)
       .join('\n');
 
-    // Log the state being sent to the model
     console.log('Sending state to model:', {
       currentPath: context.currentPath,
       currentDirFiles: Object.keys(context.fileSystem.getNode(context.currentPath)?.content || {}),
@@ -307,7 +297,6 @@ exact terminal output here
 
     const output = response.content[0].text;
     
-    // Parse and process the response
     const parts = output.split('---');
     if (parts.length < 5) {
       console.error('Invalid response format - missing sections:', parts);
@@ -317,12 +306,9 @@ exact terminal output here
     const terminalOutput = parts[2]?.trim() || '';
     const actionsJson = parts[4]?.trim();
     
-    // Process actions and update state
     if (actionsJson) {
       try {
-        // Handle empty actions gracefully
         if (!actionsJson || actionsJson === '') {
-          // No actions to process
           terminalStore.addHistory({
             command,
             output: terminalOutput,
@@ -343,7 +329,6 @@ exact terminal output here
           console.error('Failed to parse actions JSON:', jsonError);
           console.error('Raw actions JSON:', actionsJson);
           
-          // Add the command to history but with parsing error
           terminalStore.addHistory({
             command,
             output: terminalOutput,
@@ -360,7 +345,6 @@ exact terminal output here
         
         console.log('Processing actions:', actions);
         
-        // Validate action format
         if (actions.newPath && typeof actions.newPath !== 'string') {
           throw new Error('Invalid newPath format');
         }
@@ -371,14 +355,12 @@ exact terminal output here
           throw new Error('Invalid deleteFiles format');
         }
         
-        // Handle navigation
         if (actions.newPath) {
           console.log('Changing directory to:', actions.newPath);
           const newPath = actions.newPath.split('/').filter(Boolean);
           context.fileSystem.changeDirectory(newPath);
         }
         
-        // Handle file creation/updates
         if (actions.createFiles) {
           for (const file of actions.createFiles) {
             if (!file.path || !file.type || (file.type !== 'file' && file.type !== 'directory')) {
@@ -394,7 +376,6 @@ exact terminal output here
           }
         }
         
-        // Handle file deletion
         if (actions.deleteFiles) {
           for (const file of actions.deleteFiles) {
             if (typeof file !== 'string') {
@@ -406,21 +387,18 @@ exact terminal output here
           }
         }
 
-        // Get updated state after changes
         const updatedState = {
           currentPath: [...context.currentPath],
           files: context.fileSystem.getNode([])?.type === 'directory' 
             ? (context.fileSystem.getNode([])?.content as { [key: string]: FileSystemNode })
             : {}
         };
-
-        // Log the state after changes
+        
         console.log('State after changes:', {
           currentPath: updatedState.currentPath,
           files: Object.keys(updatedState.files)
         });
 
-        // Update conversation history
         terminalStore.addHistory({
           command,
           output: terminalOutput,
@@ -439,7 +417,6 @@ exact terminal output here
     
     const errorMessage = error instanceof Error ? `Error: ${error.message}` : 'An unknown error occurred';
     
-    // Add the failed command to history
     terminalStore.addHistory({
       command,
       output: errorMessage,
